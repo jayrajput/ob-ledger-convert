@@ -1,2 +1,16 @@
-# ob-ledger-convert
-Convert anything to ledger in emacs org babel
+* Introduction
+
+Ob-ledger-convert any bank/card statement transactions to ledger. It provides an org source code block called =olc= which can contain any bank/card statement and provide ledger entries as results on execution. It provides pred-defined parsers for some Indian banks/cards. In this documentation, I use =olc= as alias for =ob-ledger-convert=.
+
+* Usage
+
+* Sample Workflow
+
+Before using =Olc=, I faced difficulties in parsing PDFs received from bank/card company to extract transaction data. However, with =Olc=, the process has become much simpler. Now, I can easily copy the transaction lines from the PDF directly into =Olc=.
+
+To stay organized, I schedule the processing of credit card and bank statements for the first day of the following month. On the first of each month, I transfer the data from the PDFs into =Olc=. By executing org-babel-execute-buffer, I can generate my predefined reports. I snooze my statement email to be processed on the first of every month.
+
+* References
+
+| https://ledger-cli.org/ | Ledger CLI |
+| https://hledger.org/    | Hledger    |
