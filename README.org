@@ -1,14 +1,33 @@
 * Introduction
 
-Ob-ledger-convert any bank/card statement transactions to ledger. It provides an org source code block called =olc= which can contain any bank/card statement and provide ledger entries as results on execution. It provides pred-defined parsers for some Indian banks/cards. In this documentation, I use =olc= as alias for =ob-ledger-convert=.
+Ob-ledger-convert provide Babel function to convert any bank/card statement transactions to ledger format which can be used with ledger/hledger/beancount.  It provides an org source code block called =lc= which can contain any bank/card statement and provide ledger entries as results on execution.  The module provides some pre-defined parsers to do the conversion.  More parsers can be easily added.
 
 * Usage
 
+Create the org src block for =lc= with the bank/card transactions and then run =org-babel-execute-src-block=.  See sample.org for example usage.
+
+** Supported Parameters
+
+| :verbatim        | Output the content as it is without any parsing                                             |
+| :account         | This account name.                                                                          |
+| :remove-accounts | Transactions with these accounts are removed after parsing to avoid duplicate transactions. |
+| :opening-bal     | Opening balance for the account.                                                            |
+| :parser          | Parser                                                                                      |
+
+** Supported Parsers
+
+Following parsers are supported. See functions starting with =ob-lc-parser= in the module file.  Currently supported parsers are for Indian bank/cards.
+
+1. Axis
+2. Axis Ace
+3. HDFC
+4. ICICI
+5. ICICI Amazonpay
+6. IDFC First Bank
+
 * Sample Workflow
 
-Before using =Olc=, I faced difficulties in parsing PDFs received from bank/card company to extract transaction data. However, with =Olc=, the process has become much simpler. Now, I can easily copy the transaction lines from the PDF directly into =Olc=.
-
-To stay organized, I schedule the processing of credit card and bank statements for the first day of the following month. On the first of each month, I transfer the data from the PDFs into =Olc=. By executing org-babel-execute-buffer, I can generate my predefined reports. I snooze my statement email to be processed on the first of every month.
+Before using =ob-lc=, I faced difficulties in parsing PDFs received from bank/card company to extract transaction data.  However, with =ob-lc=, the process has become much simpler.  Now, I can easily copy the transaction lines from the PDF directly into =ob-lc=.  To stay organized, I schedule the processing of credit card and bank statements for the first day of the following month.  On the first of each month, I transfer the data from the PDFs into =ob-lc= and run =org-babel-execute-buffer=.  I snooze my statement email to be processed on the first of every month.
 
 * References
 
