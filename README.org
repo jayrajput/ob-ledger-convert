@@ -15,7 +15,7 @@ Git clone this repo and then load using =use-package= like this
 
 * Usage
 
-Create the org src block for =lc= with the bank/card transactions and then run =org-babel-execute-src-block=.  Sample below
+Create the org src block for =lc= with the bank/card transactions and then run =org-babel-execute-src-block=.  Sample below.  Also see [[https://github.com/jayrajput/ob-ledger-convert/blob/main/sample.org][sample.org]] for a complete example.  The first block below is org babel =lc= src block with parameters - =:parser=, =:account= and =:opening-bal=.  The second block is the generated ledger entries for the given transactions.
 
 #+begin_src lc :parser ob-lc-parser-axis :account assets:bank:axis :opening-bal 6846.19  :exports both
 02-04-2023 IMPS/P2A/309115398340/JAYRAJPU/HDFCBANK /Selfcc 13,075.30 39,921.49
@@ -54,7 +54,6 @@ Create the org src block for =lc= with the bank/card transactions and then run =
 
 #+end_example
 
-See sample.org for a complete example.
 
 ** Supported Parameters
 
