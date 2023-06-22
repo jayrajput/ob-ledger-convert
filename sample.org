@@ -1,49 +1,47 @@
 * Setup
 
 #+begin_src emacs-lisp
+  
   (use-package ob-lc
-    :load-path "~/git/ob-ledger-convert"
-    :config
-    (setq org-babel-default-header-args:lc
-	  '((:wrap . "example hledger"))))
+    :load-path "~/git/ob-ledger-convert")
+
 #+end_src
 
 #+RESULTS:
-: t
 
 ** Set Categories
 
 #+name: categories
-| JAY RAJPUT-ICIC        | assets:bank:icici               |
-| JAY RAJPUT-UTIB        | assets:bank:axis                |
-| XXXX 7777              | liabilities:creditcard:axis-ace |
-| 499999999999999        | liabilities:creditcard:icici-as |
-| REIMBURSEMENT          | income:reimburesement           |
-| GROCERY                | expenses:grocery                |
-| BIGBASKET              | expenses:grocery                |
-| AKSHAYAKALPA           | expenses:grocery                |
-| AMAZON                 | expenses:grocery                |
-| MB PAYMENT             | assets:payment                  |
-| UTILITIES              | expenses:utility                |
-
-
+| JAY RAJPUT-ICIC    | assets:bank:icici               |
+| JAY RAJPUT-UTIB    | assets:bank:axis                |
+| JAYRAJPU/HDFCBANK  | assets:transfers                |
+| CreditCard .* 9999 | liabilities:creditcard:axis-ace |
+| 499999999999999    | liabilities:creditcard:icici-as |
+| REIMBURSEMENT      | income:reimburesement           |
+| GROCERY            | expenses:grocery                |
+| BIGBASKET          | expenses:grocery                |
+| AKSHAYAKALPA       | expenses:grocery                |
+| AMAZON             | expenses:grocery                |
+| MB PAYMENT         | assets:payment                  |
+| UTILITIES          | expenses:utility                |
 
 #+begin_src emacs-lisp :var categories = categories
   (setq ob-lc-regex-account-map categories)
 #+end_src
 
 #+RESULTS:
-| JAY RAJPUT-ICIC | assets:bank:icici               |
-| JAY RAJPUT-UTIB | assets:bank:axis                |
-| XXXX 7777       | liabilities:creditcard:axis-ace |
-| 499999999999999 | liabilities:creditcard:icici-as |
-| REIMBURSEMENT   | income:reimburesement           |
-| GROCERY         | expenses:grocery                |
-| BIGBASKET       | expenses:grocery                |
-| AKSHAYAKALPA    | expenses:grocery                |
-| AMAZON          | expenses:grocery                |
-| MB PAYMENT      | assets:payment                  |
-| UTILITIES       | expenses:utility                |
+| JAY RAJPUT-ICIC    | assets:bank:icici               |
+| JAY RAJPUT-UTIB    | assets:bank:axis                |
+| JAYRAJPU/HDFCBANK  | assets:transfers                |
+| CreditCard .* 9999 | liabilities:creditcard:axis-ace |
+| 499999999999999    | liabilities:creditcard:icici-as |
+| REIMBURSEMENT      | income:reimburesement           |
+| GROCERY            | expenses:grocery                |
+| BIGBASKET          | expenses:grocery                |
+| AKSHAYAKALPA       | expenses:grocery                |
+| AMAZON             | expenses:grocery                |
+| MB PAYMENT         | assets:payment                  |
+| UTILITIES          | expenses:utility                |
 
 * Transactions
 ** Opening Balances
@@ -67,8 +65,6 @@
 
 ** ICICI Amazon Pay
 
-#+header: :exports both
-#+header: :remove-accounts '("assets:bank:payment")
 #+begin_src lc :parser ob-lc-parser-icici-amazonpay :account liabilities:creditcard:icic-as :opening-bal 0.0 :exports both
 02/04/2023  MYNTRA DESIGNS PRI INR BANGALORE IN -5 521.00 CR
 02/04/2023  Blink Commerce PVT LTD GURGAON IN 5 524.00
@@ -123,8 +119,6 @@
 
 ** Axis ACE
 
-#+header: :exports both
-#+header: :remove-accounts '("assets:bank:payment")
 #+begin_src lc :parser ob-lc-parser-axis-ace :account liabilities:creditcard:axis-ace :opening-bal 0.0 :exports both
 01/04/2023 GPAY RECHARGEMUMBAIIN UTILITIES 1,398.30 Dr 70.00 Cr
 01/04/2023 MB PAYMENT #MV94QF6T7ZBPMJ 1,075.30 Cr 0.00 Dr
@@ -179,24 +173,23 @@
 
 ** Axis
 
-#+header: :exports both
 #+begin_src lc :parser ob-lc-parser-axis :account assets:bank:axis :opening-bal 6846.19  :exports both
 02-04-2023 IMPS/P2A/309115398340/JAYRAJPU/HDFCBANK /Selfcc 13,075.30 39,921.49
-02-04-2023 CreditCard Payment XXXX 5168 Ref#MV94QF6T7ZBPMJ 13,075.30 26,846.19
+02-04-2023 CreditCard Payment XXXX 9999 Ref#MV94QF6T7ZBPMJ 13,075.30 26,846.19
 23-04-2023 GST @18% on Charge 2.70 26,843.49
 23-04-2023 Consolidated Charges for A/c 15.00 26,828.49
 01-05-2023 IMPS/P2A/312113348479/JAYRAJPU/HDFCBANK/Self 140,912.46 167,740.95
-01-05-2023 CreditCard Payment XXXX 5168Ref#1AV0DCL01K6JWL 140,912.46 26,828.49
+01-05-2023 CreditCard Payment XXXX 9999Ref#1AV0DCL01K6JWL 140,912.46 26,828.49
 #+end_src
 
 #+RESULTS:
 #+begin_example hledger
 2023-04-02  IMPS/P2A/309115398340/JAYRAJPU/HDFCBANK /Selfcc
     assets:bank:axis     13075.30 INR
-    expenses:misc
+    assets:transfers
 
-2023-04-02  CreditCard Payment XXXX 5168 Ref#MV94QF6T7ZBPMJ
-    expenses:misc     13075.30 INR
+2023-04-02  CreditCard Payment XXXX 9999 Ref#MV94QF6T7ZBPMJ
+    liabilities:creditcard:axis-ace     13075.30 INR
     assets:bank:axis
 
 2023-04-23  GST @18% on Charge
@@ -209,10 +202,10 @@
 
 2023-05-01  IMPS/P2A/312113348479/JAYRAJPU/HDFCBANK/Self
     assets:bank:axis     140912.46 INR
-    expenses:misc
+    assets:transfers
 
-2023-05-01  CreditCard Payment XXXX 5168Ref#1AV0DCL01K6JWL
-    expenses:misc     140912.46 INR
+2023-05-01  CreditCard Payment XXXX 9999Ref#1AV0DCL01K6JWL
+    liabilities:creditcard:axis-ace     140912.46 INR
     assets:bank:axis
 
 #+end_example

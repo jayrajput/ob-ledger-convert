@@ -27,7 +27,7 @@
 (require 'cl-lib)
 
 (defvar org-babel-default-header-args:lc
-  '((:wrap . "src hledger"))
+  '((:wrap . "example hledger"))
   "Default arguments to use when evaluating a lc source block.")
 
 (defvar ob-lc-account-misc
@@ -53,14 +53,12 @@
 			    (error "You need to specify a :parser parameter"))))
 	   (my-account (cdr (or (assq :account params)
 				(error "You need to specufy a :account parameter"))))
-	   (remove-accounts (cdr (assq :remove-accounts params)))
 	   (opening-bal (cdr (or (assq :opening-bal params)
 				 (error "You need to specify a :opening-bal parameter")))))
       (setq ob-lc-opening-bal opening-bal)
       (thread-last
 	(split-string (string-trim body) "\n" t)
 	(mapcar (lambda (x) (funcall (intern parser) my-account x)))
-	(ob-lc-remove-accounts remove-accounts)
 	(mapcar #'ob-lc-format-to-ledger)
 	(mapconcat #'identity)))))
 
@@ -157,15 +155,6 @@ be one or more elements.  It is used by other parsers."
 (defun ob-lc-amount-to-number (amount)
   "Convert AMOUNT to number after removing commas."
   (if (numberp amount) amount (string-to-number (replace-regexp-in-string "," "" amount))))
-
-(defun ob-lc-remove-accounts (accounts transactions)
-  "Remove ACCOUNTS from TRANSACTIONS."
-  (cl-remove-if (lambda (x)
-		  (let ((from-account (nth 3 x))
-			(to-account (nth 4 x)))
-		    (or (member from-account accounts)
-			(member to-account accounts))))
-		transactions))
 
 (defmacro ob-lc-nth-neg (index list)
   "nth supporting negative INDEX for LIST."

@@ -4,27 +4,64 @@ Ob-ledger-convert provide Babel function to convert any bank/card statement tran
 
 * Installation
 
-Git clone this repo and then install using =use-package= like this
+Git clone this repo and then load using =use-package= like this
 
 #+begin_src emacs-lisp
+
   (use-package ob-lc
-    :load-path "~/git/ob-ledger-convert"
-    :config
-    (setq org-babel-default-header-args:lc
-	  '((:wrap . "example hledger"))))
+      :load-path "~/git/ob-ledger-convert")
+  
 #+end_src
 
 * Usage
 
-Create the org src block for =lc= with the bank/card transactions and then run =org-babel-execute-src-block=.  See sample.org for example usage.
+Create the org src block for =lc= with the bank/card transactions and then run =org-babel-execute-src-block=.  Sample below
+
+#+begin_src lc :parser ob-lc-parser-axis :account assets:bank:axis :opening-bal 6846.19  :exports both
+02-04-2023 IMPS/P2A/309115398340/JAYRAJPU/HDFCBANK /Selfcc 13,075.30 39,921.49
+02-04-2023 CreditCard Payment XXXX 9999 Ref#MV94QF6T7ZBPMJ 13,075.30 26,846.19
+23-04-2023 GST @18% on Charge 2.70 26,843.49
+23-04-2023 Consolidated Charges for A/c 15.00 26,828.49
+01-05-2023 IMPS/P2A/312113348479/JAYRAJPU/HDFCBANK/Self 140,912.46 167,740.95
+01-05-2023 CreditCard Payment XXXX 9999Ref#1AV0DCL01K6JWL 140,912.46 26,828.49
+#+end_src
+
+#+RESULTS:
+#+begin_example hledger
+2023-04-02  IMPS/P2A/309115398340/JAYRAJPU/HDFCBANK /Selfcc
+    assets:bank:axis     13075.30 INR
+    assets:transfers
+
+2023-04-02  CreditCard Payment XXXX 9999 Ref#MV94QF6T7ZBPMJ
+    liabilities:creditcard:axis-ace     13075.30 INR
+    assets:bank:axis
+
+2023-04-23  GST @18% on Charge
+    expenses:misc     2.70 INR
+    assets:bank:axis
+
+2023-04-23  Consolidated Charges for A/c
+    expenses:misc     15.00 INR
+    assets:bank:axis
+
+2023-05-01  IMPS/P2A/312113348479/JAYRAJPU/HDFCBANK/Self
+    assets:bank:axis     140912.46 INR
+    assets:transfers
+
+2023-05-01  CreditCard Payment XXXX 9999Ref#1AV0DCL01K6JWL
+    liabilities:creditcard:axis-ace     140912.46 INR
+    assets:bank:axis
+
+#+end_example
+
+See sample.org for a complete example.
 
 ** Supported Parameters
 
-| :verbatim        | Output the content as it is without any parsing                                             |
-| :account         | This account name.                                                                          |
-| :remove-accounts | Transactions with these accounts are removed after parsing to avoid duplicate transactions. |
-| :opening-bal     | Opening balance for the account.                                                            |
-| :parser          | Parser                                                                                      |
+| :verbatim    | Output verbatim without parsing. |
+| :account     | This account name.               |
+| :opening-bal | Opening balance for the account. |
+| :parser      | Parser                           |
 
 ** Supported Parsers
 
@@ -39,9 +76,10 @@ Following parsers are supported. See functions starting with =ob-lc-parser= in t
 
 * Sample Workflow
 
-Before using =ob-lc=, I faced difficulties in parsing PDFs received from bank/card company to extract transaction data.  However, with =ob-lc=, the process has become much simpler.  Now, I can easily copy the transaction lines from the PDF directly into =ob-lc=.  To stay organized, I schedule the processing of credit card and bank statements for the first day of the following month.  On the first of each month, I transfer the data from the PDFs into =ob-lc= and run =org-babel-execute-buffer=.  I snooze my statement email to be processed on the first of every month.
+Before using =ob-lc=, I faced difficulties in parsing PDFs received from bank/card company to extract transaction data.  However, with =ob-lc=, the process has become much simpler.  Now, I can easily copy the transaction lines from the PDF directly into =lc= src block.  To stay organized, I schedule the processing of credit card and bank statements for the first day of the following month.  On the first of each month, I transfer the data from the PDFs into =ob-lc= and run =org-babel-execute-buffer=.  I snooze my statement email to be processed on the first of every month.
 
 * References
 
-| https://ledger-cli.org/ | Ledger CLI |
-| https://hledger.org/    | Hledger    |
+- https://ledger-cli.org
+- https://hledger.org
+- [[https://github.com/apauley/hledger-flow/issues/51][How to deduplicate 2 transactions that are really one transfer from one bank account to another]]
