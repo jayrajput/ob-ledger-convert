@@ -2,6 +2,18 @@
 
 Ob-ledger-convert provide Babel function to convert any bank/card statement transactions to ledger format which can be used with ledger/hledger/beancount.  It provides an org source code block called =lc= which can contain any bank/card statement and provide ledger entries as results on execution.  The module provides some pre-defined parsers to do the conversion.  More parsers can be easily added.
 
+* Installation
+
+Git clone this repo and then install using =use-package= like this
+
+#+begin_src emacs-lisp
+  (use-package ob-lc
+    :load-path "~/git/ob-ledger-convert"
+    :config
+    (setq org-babel-default-header-args:lc
+	  '((:wrap . "example hledger"))))
+#+end_src
+
 * Usage
 
 Create the org src block for =lc= with the bank/card transactions and then run =org-babel-execute-src-block=.  See sample.org for example usage.
