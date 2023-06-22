@@ -14,82 +14,36 @@
 ** Set Categories
 
 #+name: categories
-| IMPS.*-VISHAL          | loans:vishal                    |
-| JAYRAJPU/HDFCBANK      | assets:bank:hdfc                |
-| JAY RAJPUT-IDFB        | assets:bank:idfcfirstb          |
 | JAY RAJPUT-ICIC        | assets:bank:icici               |
 | JAY RAJPUT-UTIB        | assets:bank:axis                |
-| Jay Rajput/HDFC0000367 | assets:bank:hdfc                |
-| 5XXXX4425999999        | assets:bank:hdfc                |
-| ANKITA SINGGH-SBIN     | assets:bank:sbi                 |
 | XXXX 7777              | liabilities:creditcard:axis-ace |
 | 499999999999999        | liabilities:creditcard:icici-as |
 | REIMBURSEMENT          | income:reimburesement           |
 | GROCERY                | expenses:grocery                |
-| INNOVATIVE             | expenses:grocery                |
 | BIGBASKET              | expenses:grocery                |
 | AKSHAYAKALPA           | expenses:grocery                |
 | AMAZON                 | expenses:grocery                |
-| BEEJAPURIDAIRYPR       | expenses:grocery                |
-| UPI PAYMENT            | assets:payment                  |
 | MB PAYMENT             | assets:payment                  |
-| ALL SEASON             | expenses:grocery                |
 | UTILITIES              | expenses:utility                |
-| MYGATE                 | expenses:utility                |
-| EDUCATION              | expenses:education              |
-| CASHBACK               | income:cashback                 |
-| ZERODHA                | equity:zerodha                  |
-| CMS                    | income:interest:sgb             |
-| INTEREST CREDIT        | income:interest:saving          |
-| ACH                    | income:dividend                 |
-| DIV                    | income:dividend                 |
-| NSE CLIENT             | income:dividend                 |
-| SAL                    | income:salary                   |
-| RENT                   | expenses:rent                   |
-| SAKRA                  | expenses:med                    |
-| MEDICAL                | expenses:med                    |
-| HOSPITAL               | expenses:med                    |
+
+
 
 #+begin_src emacs-lisp :var categories = categories
   (setq ob-lc-regex-account-map categories)
 #+end_src
 
 #+RESULTS:
-| IMPS.*-VISHAL          | loans:vishal                    |
-| JAYRAJPU/HDFCBANK      | assets:bank:hdfc                |
-| JAY RAJPUT-IDFB        | assets:bank:idfcfirstb          |
-| JAY RAJPUT-ICIC        | assets:bank:icici               |
-| JAY RAJPUT-UTIB        | assets:bank:axis                |
-| Jay Rajput/HDFC0000367 | assets:bank:hdfc                |
-| 5XXXX4425999999        | assets:bank:hdfc                |
-| ANKITA SINGGH-SBIN     | assets:bank:sbi                 |
-| XXXX 7777              | liabilities:creditcard:axis-ace |
-| 499999999999999        | liabilities:creditcard:icici-as |
-| REIMBURSEMENT          | income:reimburesement           |
-| GROCERY                | expenses:grocery                |
-| INNOVATIVE             | expenses:grocery                |
-| BIGBASKET              | expenses:grocery                |
-| AKSHAYAKALPA           | expenses:grocery                |
-| AMAZON                 | expenses:grocery                |
-| BEEJAPURIDAIRYPR       | expenses:grocery                |
-| UPI PAYMENT            | assets:payment                  |
-| MB PAYMENT             | assets:payment                  |
-| ALL SEASON             | expenses:grocery                |
-| UTILITIES              | expenses:utility                |
-| MYGATE                 | expenses:utility                |
-| EDUCATION              | expenses:education              |
-| CASHBACK               | income:cashback                 |
-| ZERODHA                | equity:zerodha                  |
-| CMS                    | income:interest:sgb             |
-| INTEREST CREDIT        | income:interest:saving          |
-| ACH                    | income:dividend                 |
-| DIV                    | income:dividend                 |
-| NSE CLIENT             | income:dividend                 |
-| SAL                    | income:salary                   |
-| RENT                   | expenses:rent                   |
-| SAKRA                  | expenses:med                    |
-| MEDICAL                | expenses:med                    |
-| HOSPITAL               | expenses:med                    |
+| JAY RAJPUT-ICIC | assets:bank:icici               |
+| JAY RAJPUT-UTIB | assets:bank:axis                |
+| XXXX 7777       | liabilities:creditcard:axis-ace |
+| 499999999999999 | liabilities:creditcard:icici-as |
+| REIMBURSEMENT   | income:reimburesement           |
+| GROCERY         | expenses:grocery                |
+| BIGBASKET       | expenses:grocery                |
+| AKSHAYAKALPA    | expenses:grocery                |
+| AMAZON          | expenses:grocery                |
+| MB PAYMENT      | assets:payment                  |
+| UTILITIES       | expenses:utility                |
 
 * Transactions
 ** Opening Balances
@@ -125,13 +79,6 @@
 05/04/2023  AMAZON HTTP://WWW.AM IN 20 419.00
 05/04/2023  AMAZON HTTP://WWW.AM IN 24 499.00
 05/04/2023  AMAZON HTTP://WWW.AM IN 6 139.00
-05/04/2023  Blink Commerce PVT LTD GURGAON IN 10 1,011.00
-07/04/2023  INNOVATIVE RETAIL CONC BANGALORE IN 10 1,000.00
-07/04/2023  Innovative Retail Concept BANGALORE IN 81 8,122.80
-08/04/2023  AJIO MUMBAI IN 20 2,027.00
-11/04/2023  AMAZON HTTP://WWW.AM IN 24 499.00
-12/04/2023  AMAZON HTTP://WWW.AM IN -7 150.00 CR
-12/04/2023  AMAZON HTTP://WWW.AM IN 25 519.00
 #+end_src
 
 #+RESULTS:
@@ -172,34 +119,6 @@
     expenses:grocery     139.00 INR
     liabilities:creditcard:icic-as
 
-2023-04-05  Blink Commerce PVT LTD GURGAON IN 10
-    expenses:misc     1011.00 INR
-    liabilities:creditcard:icic-as
-
-2023-04-07  INNOVATIVE RETAIL CONC BANGALORE IN 10
-    expenses:grocery     1000.00 INR
-    liabilities:creditcard:icic-as
-
-2023-04-07  Innovative Retail Concept BANGALORE IN 81
-    expenses:grocery     8122.80 INR
-    liabilities:creditcard:icic-as
-
-2023-04-08  AJIO MUMBAI IN 20
-    expenses:misc     2027.00 INR
-    liabilities:creditcard:icic-as
-
-2023-04-11  AMAZON HTTP://WWW.AM IN 24
-    expenses:grocery     499.00 INR
-    liabilities:creditcard:icic-as
-
-2023-04-12  AMAZON HTTP://WWW.AM IN -7
-    liabilities:creditcard:icic-as     150.00 INR
-    expenses:grocery
-
-2023-04-12  AMAZON HTTP://WWW.AM IN 25
-    expenses:grocery     519.00 INR
-    liabilities:creditcard:icic-as
-
 #+end_example
 
 ** Axis ACE
@@ -233,7 +152,7 @@
     liabilities:creditcard:axis-ace
 
 2023-04-04  FOSTR PHARMABANGALOREIN MEDICAL
-    expenses:med     1198.00 INR
+    expenses:misc     1198.00 INR
     liabilities:creditcard:axis-ace
 
 2023-04-04  POMAC HYPER MARKET PRIBANGALOREIN DEPT STORES
@@ -245,7 +164,7 @@
     liabilities:creditcard:axis-ace
 
 2023-04-04  FOSTR PHARMABANGALOREIN MEDICAL
-    expenses:med     2944.00 INR
+    expenses:misc     2944.00 INR
     liabilities:creditcard:axis-ace
 
 2023-04-06  INDIAN OIL CORPORATIONMUMBAIIN UTILITIES
@@ -274,7 +193,7 @@
 #+begin_example hledger
 2023-04-02  IMPS/P2A/309115398340/JAYRAJPU/HDFCBANK /Selfcc
     assets:bank:axis     13075.30 INR
-    assets:bank:hdfc
+    expenses:misc
 
 2023-04-02  CreditCard Payment XXXX 5168 Ref#MV94QF6T7ZBPMJ
     expenses:misc     13075.30 INR
@@ -290,7 +209,7 @@
 
 2023-05-01  IMPS/P2A/312113348479/JAYRAJPU/HDFCBANK/Self
     assets:bank:axis     140912.46 INR
-    assets:bank:hdfc
+    expenses:misc
 
 2023-05-01  CreditCard Payment XXXX 5168Ref#1AV0DCL01K6JWL
     expenses:misc     140912.46 INR
