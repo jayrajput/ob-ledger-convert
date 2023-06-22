@@ -1,0 +1,329 @@
+* Setup
+
+#+begin_src emacs-lisp
+  (use-package ob-lc
+    :load-path "~/git/ob-ledger-convert"
+    :config
+    (setq org-babel-default-header-args:lc
+	  '((:wrap . "example hledger"))))
+#+end_src
+
+#+RESULTS:
+: t
+
+** Set Categories
+
+#+name: categories
+| IMPS.*-VISHAL          | loans:vishal                    |
+| JAYRAJPU/HDFCBANK      | assets:bank:hdfc                |
+| JAY RAJPUT-IDFB        | assets:bank:idfcfirstb          |
+| JAY RAJPUT-ICIC        | assets:bank:icici               |
+| JAY RAJPUT-UTIB        | assets:bank:axis                |
+| Jay Rajput/HDFC0000367 | assets:bank:hdfc                |
+| 5XXXX4425999999        | assets:bank:hdfc                |
+| ANKITA SINGGH-SBIN     | assets:bank:sbi                 |
+| XXXX 7777              | liabilities:creditcard:axis-ace |
+| 499999999999999        | liabilities:creditcard:icici-as |
+| REIMBURSEMENT          | income:reimburesement           |
+| GROCERY                | expenses:grocery                |
+| INNOVATIVE             | expenses:grocery                |
+| BIGBASKET              | expenses:grocery                |
+| AKSHAYAKALPA           | expenses:grocery                |
+| AMAZON                 | expenses:grocery                |
+| BEEJAPURIDAIRYPR       | expenses:grocery                |
+| UPI PAYMENT            | assets:payment                  |
+| MB PAYMENT             | assets:payment                  |
+| ALL SEASON             | expenses:grocery                |
+| UTILITIES              | expenses:utility                |
+| MYGATE                 | expenses:utility                |
+| EDUCATION              | expenses:education              |
+| CASHBACK               | income:cashback                 |
+| ZERODHA                | equity:zerodha                  |
+| CMS                    | income:interest:sgb             |
+| INTEREST CREDIT        | income:interest:saving          |
+| ACH                    | income:dividend                 |
+| DIV                    | income:dividend                 |
+| NSE CLIENT             | income:dividend                 |
+| SAL                    | income:salary                   |
+| RENT                   | expenses:rent                   |
+| SAKRA                  | expenses:med                    |
+| MEDICAL                | expenses:med                    |
+| HOSPITAL               | expenses:med                    |
+
+#+begin_src emacs-lisp :var categories = categories
+  (setq ob-lc-regex-account-map categories)
+#+end_src
+
+#+RESULTS:
+| IMPS.*-VISHAL          | loans:vishal                    |
+| JAYRAJPU/HDFCBANK      | assets:bank:hdfc                |
+| JAY RAJPUT-IDFB        | assets:bank:idfcfirstb          |
+| JAY RAJPUT-ICIC        | assets:bank:icici               |
+| JAY RAJPUT-UTIB        | assets:bank:axis                |
+| Jay Rajput/HDFC0000367 | assets:bank:hdfc                |
+| 5XXXX4425999999        | assets:bank:hdfc                |
+| ANKITA SINGGH-SBIN     | assets:bank:sbi                 |
+| XXXX 7777              | liabilities:creditcard:axis-ace |
+| 499999999999999        | liabilities:creditcard:icici-as |
+| REIMBURSEMENT          | income:reimburesement           |
+| GROCERY                | expenses:grocery                |
+| INNOVATIVE             | expenses:grocery                |
+| BIGBASKET              | expenses:grocery                |
+| AKSHAYAKALPA           | expenses:grocery                |
+| AMAZON                 | expenses:grocery                |
+| BEEJAPURIDAIRYPR       | expenses:grocery                |
+| UPI PAYMENT            | assets:payment                  |
+| MB PAYMENT             | assets:payment                  |
+| ALL SEASON             | expenses:grocery                |
+| UTILITIES              | expenses:utility                |
+| MYGATE                 | expenses:utility                |
+| EDUCATION              | expenses:education              |
+| CASHBACK               | income:cashback                 |
+| ZERODHA                | equity:zerodha                  |
+| CMS                    | income:interest:sgb             |
+| INTEREST CREDIT        | income:interest:saving          |
+| ACH                    | income:dividend                 |
+| DIV                    | income:dividend                 |
+| NSE CLIENT             | income:dividend                 |
+| SAL                    | income:salary                   |
+| RENT                   | expenses:rent                   |
+| SAKRA                  | expenses:med                    |
+| MEDICAL                | expenses:med                    |
+| HOSPITAL               | expenses:med                    |
+
+* Transactions
+** Opening Balances
+
+#+begin_src lc :verbatim :exports both
+2023-04-01 opening balances
+    assets:bank:axis     26846.19 INR
+    liabilities:creditcard:axis-ace     0.00 INR
+    liabilities:creditcard:icici-as     0.00 INR
+    opening balances
+#+end_src
+
+#+RESULTS:
+#+begin_example hledger
+2023-04-01 opening balances
+    assets:bank:axis     26846.19 INR
+    liabilities:creditcard:axis-ace     0.00 INR
+    liabilities:creditcard:icici-as     0.00 INR
+    opening balances
+#+end_example
+
+** ICICI Amazon Pay
+
+#+header: :exports both
+#+header: :remove-accounts '("assets:bank:payment")
+#+begin_src lc :parser ob-lc-parser-icici-amazonpay :account liabilities:creditcard:icic-as :opening-bal 0.0 :exports both
+02/04/2023  MYNTRA DESIGNS PRI INR BANGALORE IN -5 521.00 CR
+02/04/2023  Blink Commerce PVT LTD GURGAON IN 5 524.00
+02/04/2023  AKSHAYAKALPA FARMS BANGALORE IN 10 1,000.00
+03/04/2023  MYNTRA DESIGNS PVT. LT MUMBAI IN -4 439.00 CR
+04/04/2023  AMAZON HTTP://WWW.AM IN 18 369.00
+05/04/2023  AMAZON HTTP://WWW.AM IN 12 247.00
+05/04/2023  AMAZON HTTP://WWW.AM IN 20 419.00
+05/04/2023  AMAZON HTTP://WWW.AM IN 24 499.00
+05/04/2023  AMAZON HTTP://WWW.AM IN 6 139.00
+05/04/2023  Blink Commerce PVT LTD GURGAON IN 10 1,011.00
+07/04/2023  INNOVATIVE RETAIL CONC BANGALORE IN 10 1,000.00
+07/04/2023  Innovative Retail Concept BANGALORE IN 81 8,122.80
+08/04/2023  AJIO MUMBAI IN 20 2,027.00
+11/04/2023  AMAZON HTTP://WWW.AM IN 24 499.00
+12/04/2023  AMAZON HTTP://WWW.AM IN -7 150.00 CR
+12/04/2023  AMAZON HTTP://WWW.AM IN 25 519.00
+#+end_src
+
+#+RESULTS:
+#+begin_example hledger
+2023-04-02  MYNTRA DESIGNS PRI INR BANGALORE IN -5
+    liabilities:creditcard:icic-as     521.00 INR
+    expenses:misc
+
+2023-04-02  Blink Commerce PVT LTD GURGAON IN 5
+    expenses:misc     524.00 INR
+    liabilities:creditcard:icic-as
+
+2023-04-02  AKSHAYAKALPA FARMS BANGALORE IN 10
+    expenses:grocery     1000.00 INR
+    liabilities:creditcard:icic-as
+
+2023-04-03  MYNTRA DESIGNS PVT. LT MUMBAI IN -4
+    liabilities:creditcard:icic-as     439.00 INR
+    expenses:misc
+
+2023-04-04  AMAZON HTTP://WWW.AM IN 18
+    expenses:grocery     369.00 INR
+    liabilities:creditcard:icic-as
+
+2023-04-05  AMAZON HTTP://WWW.AM IN 12
+    expenses:grocery     247.00 INR
+    liabilities:creditcard:icic-as
+
+2023-04-05  AMAZON HTTP://WWW.AM IN 20
+    expenses:grocery     419.00 INR
+    liabilities:creditcard:icic-as
+
+2023-04-05  AMAZON HTTP://WWW.AM IN 24
+    expenses:grocery     499.00 INR
+    liabilities:creditcard:icic-as
+
+2023-04-05  AMAZON HTTP://WWW.AM IN 6
+    expenses:grocery     139.00 INR
+    liabilities:creditcard:icic-as
+
+2023-04-05  Blink Commerce PVT LTD GURGAON IN 10
+    expenses:misc     1011.00 INR
+    liabilities:creditcard:icic-as
+
+2023-04-07  INNOVATIVE RETAIL CONC BANGALORE IN 10
+    expenses:grocery     1000.00 INR
+    liabilities:creditcard:icic-as
+
+2023-04-07  Innovative Retail Concept BANGALORE IN 81
+    expenses:grocery     8122.80 INR
+    liabilities:creditcard:icic-as
+
+2023-04-08  AJIO MUMBAI IN 20
+    expenses:misc     2027.00 INR
+    liabilities:creditcard:icic-as
+
+2023-04-11  AMAZON HTTP://WWW.AM IN 24
+    expenses:grocery     499.00 INR
+    liabilities:creditcard:icic-as
+
+2023-04-12  AMAZON HTTP://WWW.AM IN -7
+    liabilities:creditcard:icic-as     150.00 INR
+    expenses:grocery
+
+2023-04-12  AMAZON HTTP://WWW.AM IN 25
+    expenses:grocery     519.00 INR
+    liabilities:creditcard:icic-as
+
+#+end_example
+
+** Axis ACE
+
+#+header: :exports both
+#+header: :remove-accounts '("assets:bank:payment")
+#+begin_src lc :parser ob-lc-parser-axis-ace :account liabilities:creditcard:axis-ace :opening-bal 0.0 :exports both
+01/04/2023 GPAY RECHARGEMUMBAIIN UTILITIES 1,398.30 Dr 70.00 Cr
+01/04/2023 MB PAYMENT #MV94QF6T7ZBPMJ 1,075.30 Cr 0.00 Dr
+03/04/2023 COMMISSIONER BBMPBANGALOREIN GOVT SERVICES 592.59 Dr 0.00 Cr
+04/04/2023 FOSTR PHARMABANGALOREIN MEDICAL 1,198.00 Dr 24.00 Cr
+04/04/2023 POMAC HYPER MARKET PRIBANGALOREIN DEPT STORES 365.09 Dr 7.00 Cr
+04/04/2023 ADITYA BIRLA FASHION ABENGALURUIN CLOTH STORES 1,496.00 Dr 30.00 Cr
+04/04/2023 FOSTR PHARMABANGALOREIN MEDICAL 2,944.00 Dr 59.00 Cr
+06/04/2023 INDIAN OIL CORPORATIONMUMBAIIN UTILITIES 1,113.79 Dr 22.00 Cr
+09/04/2023 BLINK COMMERCE PVT LTDGURGAONIN DEPT STORES 1,108.00 Dr 22.00 Cr
+#+end_src
+
+#+RESULTS:
+#+begin_example hledger
+2023-04-01  GPAY RECHARGEMUMBAIIN UTILITIES
+    expenses:utility     1398.30 INR
+    liabilities:creditcard:axis-ace
+
+2023-04-01  MB PAYMENT #MV94QF6T7ZBPMJ
+    liabilities:creditcard:axis-ace     1075.30 INR
+    assets:payment
+
+2023-04-03  COMMISSIONER BBMPBANGALOREIN GOVT SERVICES
+    expenses:misc     592.59 INR
+    liabilities:creditcard:axis-ace
+
+2023-04-04  FOSTR PHARMABANGALOREIN MEDICAL
+    expenses:med     1198.00 INR
+    liabilities:creditcard:axis-ace
+
+2023-04-04  POMAC HYPER MARKET PRIBANGALOREIN DEPT STORES
+    expenses:misc     365.09 INR
+    liabilities:creditcard:axis-ace
+
+2023-04-04  ADITYA BIRLA FASHION ABENGALURUIN CLOTH STORES
+    expenses:misc     1496.00 INR
+    liabilities:creditcard:axis-ace
+
+2023-04-04  FOSTR PHARMABANGALOREIN MEDICAL
+    expenses:med     2944.00 INR
+    liabilities:creditcard:axis-ace
+
+2023-04-06  INDIAN OIL CORPORATIONMUMBAIIN UTILITIES
+    expenses:utility     1113.79 INR
+    liabilities:creditcard:axis-ace
+
+2023-04-09  BLINK COMMERCE PVT LTDGURGAONIN DEPT STORES
+    expenses:misc     1108.00 INR
+    liabilities:creditcard:axis-ace
+
+#+end_example
+
+** Axis
+
+#+header: :exports both
+#+begin_src lc :parser ob-lc-parser-axis :account assets:bank:axis :opening-bal 6846.19  :exports both
+02-04-2023 IMPS/P2A/309115398340/JAYRAJPU/HDFCBANK /Selfcc 13,075.30 39,921.49
+02-04-2023 CreditCard Payment XXXX 5168 Ref#MV94QF6T7ZBPMJ 13,075.30 26,846.19
+23-04-2023 GST @18% on Charge 2.70 26,843.49
+23-04-2023 Consolidated Charges for A/c 15.00 26,828.49
+01-05-2023 IMPS/P2A/312113348479/JAYRAJPU/HDFCBANK/Self 140,912.46 167,740.95
+01-05-2023 CreditCard Payment XXXX 5168Ref#1AV0DCL01K6JWL 140,912.46 26,828.49
+#+end_src
+
+#+RESULTS:
+#+begin_example hledger
+2023-04-02  IMPS/P2A/309115398340/JAYRAJPU/HDFCBANK /Selfcc
+    assets:bank:axis     13075.30 INR
+    assets:bank:hdfc
+
+2023-04-02  CreditCard Payment XXXX 5168 Ref#MV94QF6T7ZBPMJ
+    expenses:misc     13075.30 INR
+    assets:bank:axis
+
+2023-04-23  GST @18% on Charge
+    expenses:misc     2.70 INR
+    assets:bank:axis
+
+2023-04-23  Consolidated Charges for A/c
+    expenses:misc     15.00 INR
+    assets:bank:axis
+
+2023-05-01  IMPS/P2A/312113348479/JAYRAJPU/HDFCBANK/Self
+    assets:bank:axis     140912.46 INR
+    assets:bank:hdfc
+
+2023-05-01  CreditCard Payment XXXX 5168Ref#1AV0DCL01K6JWL
+    expenses:misc     140912.46 INR
+    assets:bank:axis
+
+#+end_example
+
+* Create Ledger Journal
+
+Combine all the ledger output to a file. This will overwrite the destination file.
+
+#+begin_src emacs-lisp :results file :file C:/Users/jayra/.hledger.journal
+  (defun get-lines-between-patterns (start-pattern end-pattern)
+    "Get all lines between START-PATTERN and END-PATTERN in the current buffer."
+    (save-excursion
+      (let (lines)
+	(goto-char (point-min))
+	(while (search-forward-regexp (regexp-quote start-pattern) nil t)
+	  (let ((start-pos (line-end-position)))
+	    (when (search-forward-regexp (regexp-quote end-pattern) nil t)
+	      (let ((end-pos (line-beginning-position)))
+		(setq lines (concat lines (buffer-substring-no-properties start-pos end-pos)))))))
+	lines)))
+
+  ; this relies on the fact the ob-lc was configured to wrap the results
+  ; in a drawer. Customize this code based on wrapping.
+  (let ((start-pattern "begin_example")
+	(end-pattern "end_example"))
+    (get-lines-between-patterns start-pattern end-pattern))
+#+end_src
+
+#+RESULTS:
+[[file:C:/Users/jayra/.hledger.journal]]
+
+
+
