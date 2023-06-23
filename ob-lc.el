@@ -44,6 +44,9 @@
 (defvar-local ob-lc-opening-bal nil
   "Holds the opening-bal used by parsers to find if the entry is credited/debited and closing balance.")
 
+(defvar-local ob-lc-my-account nil
+  "Read only variable in the code which is set to the argument passed to the org-babel-execute:lc.")
+
 ;; Main 
 
 (defun org-babel-execute:lc (body params)
@@ -56,19 +59,17 @@
 	   (opening-bal (cdr (or (assq :opening-bal params)
 				 (error "You need to specify a :opening-bal parameter")))))
       (setq ob-lc-opening-bal opening-bal)
+      (setq ob-lc-my-account my-account)
       (thread-last
 	(split-string (string-trim body) "\n" t)
-	(mapcar (lambda (x) (funcall (intern parser) my-account x)))
+	(mapcar (intern parser))
 	(mapcar #'ob-lc-format-to-ledger)
 	(mapconcat #'identity)))))
 
-(defun org-babel-execute:lc-verbatin (body params)
-  body)
-
 ;; Parsers
 
-(defun ob-lc-parse-date-desc-amount-total (my-account items)
-  "Convert ITEMS into ledger using MY-ACCOUNT. 
+(defun ob-lc-parser-date-desc-amount-total (items)
+  "Convert ITEMS into ledger format. 
 
 ITEMS is a list of date, description, amount, total.  Description can
 be one or more elements.  It is used by other parsers."
@@ -78,24 +79,35 @@ be one or more elements.  It is used by other parsers."
 	 (closing-bal (ob-lc-amount-to-number (ob-lc-nth-neg -1 items)))
 	 (credited (> closing-bal ob-lc-opening-bal))
 	 (other-account (ob-lc-get-account-from-desc description))
-	 (from-account (if credited other-account my-account))
-	 (to-account (if credited my-account other-account)))
+	 (from-account (if credited other-account ob-lc-my-account))
+	 (to-account (if credited ob-lc-my-account other-account)))
     (setq ob-lc-opening-bal closing-bal)
     (list date description amount from-account to-account)))
 
-(defun ob-lc-parser-icici-amazonpay (my-account line)
-  "Convert LINE into ledger using MY-ACCOUNT for IDFC First Bank."
+;; all the bank/card lines are converted to a list containing date, description, amount, closing-bal, ob-lc-my-account
+;; ob-lc-line
+
+;; Transaction
+;; (cl-defstruct ob-lc-txn
+;;   date description amount opening-bal closing-bal from-account to-account)
+
+;; (defun ob-lc--get-accounts (ob-lc-my-account other-account opening-bal closing-bal)
+;;   (if (> closing-bal opening-bal)
+;;       (list other-account ob-lc-my-account)
+;;     (list ob-lc-my-account other-account)))
+
+(defun ob-lc-parser-icici-amazonpay (line)
+  "Convert LINE into ledger for ICICI Amazonpay."
   (let* ((items (split-string line))
 	 (debit (string-equal (ob-lc-nth-neg -1 items) "CR"))
 	 (items (if debit (cl-subseq items 0 -1) items))
 	 (amount (ob-lc-amount-to-number (ob-lc-nth-neg -1 items)))
 	 (closing-bal (if debit (+ ob-lc-opening-bal amount) (- ob-lc-opening-bal amount))))
-    (ob-lc-parse-date-desc-amount-total
-     my-account
+    (ob-lc-parser-date-desc-amount-total
      (append items (list closing-bal)))))
 
-(defun ob-lc-parser-axis-ace (my-account line)
-  "Convert LINE into ledger using MY-ACCOUNT for IDFC First Bank."
+(defun ob-lc-parser-axis-ace (line)
+  "Convert LINE into ledger for AXIS ACE."
   (let* ((items (split-string line))
 	 (amount1 (ob-lc-amount-to-number (ob-lc-nth-neg -4 items)))
 	 (unit1 (ob-lc-nth-neg -3 items))
@@ -105,35 +117,30 @@ be one or more elements.  It is used by other parsers."
 	 (dr-amount (if (string-equal unit1 "Dr") amount1 amount2))
 	 (amount (if (and (> cr-amount dr-amount) (zerop dr-amount)) cr-amount dr-amount))
 	 (closing-bal (if (equal amount cr-amount) (+ ob-lc-opening-bal amount) (- ob-lc-opening-bal amount))))
-    (ob-lc-parse-date-desc-amount-total
-     my-account
+    (ob-lc-parser-date-desc-amount-total
      (append (cl-subseq items 0 -4) (list amount closing-bal)))))
 
-(defun ob-lc-parser-axis (my-account line)
-  "Convert LINE into ledger using MY-ACCOUNT for IDFC First Bank."
-  (ob-lc-parse-date-desc-amount-total
-   my-account
+(defun ob-lc-parser-axis (line)
+  "Convert LINE into ledger for AXIS."
+  (ob-lc-parser-date-desc-amount-total
    (split-string line)))
 
-(defun ob-lc-parser-hdfc (my-account line)
-  "Convert LINE into ledger using MY-ACCOUNT for IDFC First Bank."
+(defun ob-lc-parser-hdfc (line)
+  "Convert LINE into ledger for HDFC."
   (let* ((items (split-string line))
 	 (closing-bal (ob-lc-amount-to-number (ob-lc-nth-neg -1 items)))
 	 (debit-amount (ob-lc-amount-to-number (ob-lc-nth-neg -2 items)))
 	 (credit-amount (ob-lc-amount-to-number (ob-lc-nth-neg -3 items)))
 	 (amount (if (zerop debit-amount) credit-amount debit-amount)))
-    (ob-lc-parse-date-desc-amount-total
-     my-account
+    (ob-lc-parser-date-desc-amount-total
      (append (cl-subseq items 0 -3) (list amount closing-bal)))))
 
-(defun ob-lc-parser-idfcfirstb (my-account line)
-  "Convert LINE into ledger using MY-ACCOUNT for IDFC First Bank."
+(defun ob-lc-parser-idfcfirstb (line)
+  "Convert LINE into ledger for IDFC First Bank."
   (let* ((items (split-string line))
-	 (date-str (format-time-string "%d-%m-%Y" (date-to-time (mapconcat #'prin1-to-string (cl-subseq items 0 3)))))
-	 (new-items (append (list date-str) (cl-subseq items 7 -1))))
-    (ob-lc-parse-date-desc-amount-total
-     my-account
-     new-items)))
+	 (date-str (format-time-string "%d-%m-%Y" (date-to-time (mapconcat #'prin1-to-string (cl-subseq items 0 3))))))
+    (ob-lc-parser-date-desc-amount-total
+     (append (list date-str) (cl-subseq items 7 -1)))))
 
 ;; Utility functions
 
