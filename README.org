@@ -82,3 +82,4 @@ Before using =ob-lc=, I faced difficulties in parsing PDFs received from bank/ca
 - https://ledger-cli.org
 - https://hledger.org
 - [[https://github.com/apauley/hledger-flow/issues/51][How to deduplicate 2 transactions that are really one transfer from one bank account to another]]
+- https://github.com/ananthakumaran/paisa

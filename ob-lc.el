@@ -26,6 +26,8 @@
 (require 'ob)
 (require 'cl-lib)
 
+
+
 (defvar org-babel-default-header-args:lc
   '((:wrap . "example hledger"))
   "Default arguments to use when evaluating a lc source block.")
@@ -42,10 +44,16 @@
     ("CASHBACK"  "income:cashback")))
 
 (defvar-local ob-lc-opening-bal nil
-  "Holds the opening-bal used by parsers to find if the entry is credited/debited and closing balance.")
+  "Holds the opening-bal used by parser to find if the entry is credited/debited and closing balance.")
+
+(defvar-local ob-lc-closing-bal nil
+  "Holds the closing-bal used by parser to find if the entry is credited/debited.")
 
 (defvar-local ob-lc-my-account nil
   "Read only variable in the code which is set to the argument passed to the org-babel-execute:lc.")
+
+(defvar-local ob-lc-txn nil
+  "Holds the txn which gets updated by different function for different attributes.")
 
 ;; Main 
 
@@ -85,40 +93,57 @@ be one or more elements.  It is used by other parsers."
     (list date description amount from-account to-account)))
 
 ;; all the bank/card lines are converted to a list containing date, description, amount, closing-bal, ob-lc-my-account
-;; ob-lc-line
 
-;; Transaction
-;; (cl-defstruct ob-lc-txn
-;;   date description amount opening-bal closing-bal from-account to-account)
 
-;; (defun ob-lc--get-accounts (ob-lc-my-account other-account opening-bal closing-bal)
-;;   (if (> closing-bal opening-bal)
-;;       (list other-account ob-lc-my-account)
-;;     (list ob-lc-my-account other-account)))
+(rx-define ob-lc-amnt-rx (seq (one-or-more (or "," digit)) "." (repeat 2 digit)))
+(defmacro ob-lc-line-rx (&rest args)
+  "Convert given ARGS into rx separate by space and each item enclosed in a group."
+  `(rx bol
+       ,@(mapcar (lambda (x) `(seq (group ,x) space)) (butlast `,args))
+       (group ,(car (last args)))))
+
+(defconst
+  ob-lc-amazonpay-rx
+  (ob-lc-line-rx
+   (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
+   (+ any) ; description
+   ob-lc-amnt-rx) ; amount
+  "Regexp for ICICI Amazonpay.")
 
 (defun ob-lc-parser-icici-amazonpay (line)
-  "Convert LINE into ledger for ICICI Amazonpay."
-  (let* ((items (split-string line))
-	 (debit (string-equal (ob-lc-nth-neg -1 items) "CR"))
-	 (items (if debit (cl-subseq items 0 -1) items))
-	 (amount (ob-lc-amount-to-number (ob-lc-nth-neg -1 items)))
-	 (closing-bal (if debit (+ ob-lc-opening-bal amount) (- ob-lc-opening-bal amount))))
-    (ob-lc-parser-date-desc-amount-total
-     (append items (list closing-bal)))))
+  (if (string-match ob-lc-amazonpay-rx line)
+      (let* ((date (match-string 1 line))
+	     (desc (match-string 2 line))
+	     (amnt (ob-lc-amount-to-number (match-string 3 line)))
+	     (credit (string-suffix-p "CR" line))
+	     (amnt (if credit (- amnt) amnt))
+	     (desc-account (ob-lc-get-account-from-desc desc)))
+	(list (ob-lc-ledger-date date) desc amnt ob-lc-my-account desc-account))
+    (error "Line does not match regex:%s." ob-lc-amazonpay-rx)))
+
+(defconst ob-lc-axis-ace-rx
+  (ob-lc-line-rx
+   (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit))
+   (+ any)
+   ob-lc-amnt-rx
+   (or "Dr" "Cr")
+   ob-lc-amnt-rx
+   (or "Dr" "Cr"))
+  "Regexp for Axis ACE.")
 
 (defun ob-lc-parser-axis-ace (line)
-  "Convert LINE into ledger for AXIS ACE."
-  (let* ((items (split-string line))
-	 (amount1 (ob-lc-amount-to-number (ob-lc-nth-neg -4 items)))
-	 (unit1 (ob-lc-nth-neg -3 items))
-	 (amount2 (ob-lc-amount-to-number (ob-lc-nth-neg -2 items)))
-	 (unit2 (ob-lc-nth-neg -1 items))
-	 (cr-amount (if (string-equal unit1 "Cr") amount1 amount2))
-	 (dr-amount (if (string-equal unit1 "Dr") amount1 amount2))
-	 (amount (if (and (> cr-amount dr-amount) (zerop dr-amount)) cr-amount dr-amount))
-	 (closing-bal (if (equal amount cr-amount) (+ ob-lc-opening-bal amount) (- ob-lc-opening-bal amount))))
-    (ob-lc-parser-date-desc-amount-total
-     (append (cl-subseq items 0 -4) (list amount closing-bal)))))
+  (if (string-match ob-lc-axis-ace-rx line)
+      (let* ((date (match-string 1 line))
+	     (desc (match-string 2 line))
+	     (amnt1 (ob-lc-amount-to-number (match-string 3 line)))
+	     (unit1 (match-string 4 line))
+	     (amnt2 (ob-lc-amount-to-number (match-string 5 line)))
+	     (unit2 (match-string 6 line))
+	     (credit (if (string-equal unit1 "Cr") amnt1 amnt2))
+	     (debit  (if (string-equal unit2 "Dr") amnt2 amnt1))
+	     (amnt (if (and (> credit debit) (zerop debit)) (- credit) debit)))
+	(list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc)))
+    (error "Line does not match regex:%s" ob-lc-axis-ace-rx)))
 
 (defun ob-lc-parser-axis (line)
   "Convert LINE into ledger for AXIS."
@@ -138,9 +163,9 @@ be one or more elements.  It is used by other parsers."
 (defun ob-lc-parser-idfcfirstb (line)
   "Convert LINE into ledger for IDFC First Bank."
   (let* ((items (split-string line))
-	 (date-str (format-time-string "%d-%m-%Y" (date-to-time (mapconcat #'prin1-to-string (cl-subseq items 0 3))))))
+	 (date-str (string-join (cl-subseq items 0 3) " ")))
     (ob-lc-parser-date-desc-amount-total
-     (append (list date-str) (cl-subseq items 7 -1)))))
+     (append (list (ob-lc-get-formatted-date date-str "%d%b%Y")) (cl-subseq items 7 -1)))))
 
 ;; Utility functions
 
@@ -158,6 +183,7 @@ be one or more elements.  It is used by other parsers."
 	 (month (nth 1 date-components))
 	 (year (nth 2 date-components)))
     (format-time-string "%Y-%m-%d" (encode-time 0 0 0 day month year))))
+
 
 (defun ob-lc-amount-to-number (amount)
   "Convert AMOUNT to number after removing commas."
