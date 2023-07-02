@@ -223,10 +223,6 @@ Supported Input Formats are DD/MM/YYYY, DD-MM-YYYY, 'DD MMM YY'"
   "Convert AMOUNT to number after removing commas."
   (if (numberp amount) amount (string-to-number (replace-regexp-in-string "," "" amount))))
 
-(defmacro ob-lc-nth-neg (index list)
-  "nth supporting negative INDEX for LIST."
-  `(nth (if (>= ,index 0) ,index (+ (length ,list) ,index)) ,list))
-
 (defun ob-lc-format-to-ledger (expense)
   "Format the EXPENSE as per ledger."
   (let* ((date (car expense))
