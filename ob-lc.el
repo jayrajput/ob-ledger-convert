@@ -69,7 +69,7 @@
 
 ;; Parsers
 
-;; reusable regexps.
+;;; reusable regexps.
 (rx-define ob-lc-amnt-rx (seq (one-or-more (or "," digit)) "." (repeat 2 digit)))
 (defmacro ob-lc-line-rx (&rest args)
   "Convert given ARGS into rx separated by space and each arg enclosed in a group for extraction."
