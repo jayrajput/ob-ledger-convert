@@ -45,14 +45,8 @@
 (defvar-local ob-lc-opening-bal nil
   "Holds the opening-bal used by parser to find if the entry is credited/debited and closing balance.")
 
-(defvar-local ob-lc-closing-bal nil
-  "Holds the closing-bal used by parser to find if the entry is credited/debited.")
-
 (defvar-local ob-lc-my-account nil
   "Read only variable in the code which is set to the argument passed to the org-babel-execute:lc.")
-
-(defvar-local ob-lc-txn nil
-  "Holds the txn which gets updated by different function for different attributes.")
 
 ;; Main 
 
