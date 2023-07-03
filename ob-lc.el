@@ -56,7 +56,7 @@
     (let* ((parser (cdr (or (assq :parser params)
 			    (error "You need to specify a :parser parameter"))))
 	   (my-account (cdr (or (assq :account params)
-				(error "You need to specufy a :account parameter"))))
+				(error "You need to specify a :account parameter"))))
 	   (opening-bal (cdr (or (assq :opening-bal params)
 				 (error "You need to specify a :opening-bal parameter")))))
       (setq ob-lc-opening-bal opening-bal)
