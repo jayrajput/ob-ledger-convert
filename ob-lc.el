@@ -200,23 +200,17 @@
 				   return (car  category-value))))
     (or matched-category ob-lc-account-misc)))
 
-(defun ob-lc-date-normalize-month (month-str)
-  (let* ((month (downcase month-str))
-	 (match (assoc month parse-time-months)))
-    (if match (cdr match) (string-to-number month))))
-
-(defun ob-lc-date-normalize-year (year-str)
-  (let ((year (string-to-number year-str)))
-    (if (< year 100) (+ year 2000) year)))
-
 (defun ob-lc-ledger-date (date-string)
   "Converts a DATE-STRING of different formats to YYYY/MM/DD format.
 
 Supported Input Formats are DD/MM/YYYY, DD-MM-YYYY, 'DD MMM YY'"
   (let* ((date-components (split-string date-string "[ /-]"))
 	 (day (string-to-number (nth 0 date-components)))
-	 (month (ob-lc-date-normalize-month (nth 1 date-components)))
-	 (year (ob-lc-date-normalize-year (nth 2 date-components))))
+	 (month (downcase (nth 1 date-components)))
+	 (match (assoc month parse-time-months))
+	 (month (if match (cdr match) (string-to-number month)))
+	 (year (string-to-number (nth 2 date-components)))
+	 (year (if (<year 100) (+year 2000) year)))
     (format-time-string "%Y-%m-%d" (encode-time 0 0 0 day month year))))
 
 (defun ob-lc-amount-to-number (amount)
