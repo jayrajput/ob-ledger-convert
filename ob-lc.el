@@ -53,14 +53,9 @@
 (defun org-babel-execute:lc (body params)
   (if-let ((verbatim (assoc :verbatim params)))
       body
-    (let* ((parser (cdr (or (assq :parser params)
-			    (error "You need to specify a :parser parameter"))))
-	   (my-account (cdr (or (assq :account params)
-				(error "You need to specify a :account parameter"))))
-	   (opening-bal (cdr (or (assq :opening-bal params)
-				 (error "You need to specify a :opening-bal parameter")))))
-      (setq ob-lc-opening-bal opening-bal)
-      (setq ob-lc-my-account my-account)
+    (let* ((parser (ob-lc-get-param-or-error :parser params))
+	   (ob-lc-my-account (ob-lc-get-param-or-error :account params))
+	   (ob-lc-opening-bal (ob-lc-get-param-or-error :opening-bal params)))
       (thread-last
 	(split-string (string-trim body) "\n" t)
 	(mapcar (intern parser))
@@ -189,6 +184,11 @@
     (list date desc amnt)))
 
 ;; Utility functions
+
+(defun ob-lc-get-param-or-error (key params)
+  "Return value for KEY in PARAMS. Generate error if KEY not found."
+  (cdr (or (assq key params)
+	   (error "You need to specify a %s parameter" key))))
 
 (defun ob-lc-parser-normalize-date (expense)
   (cons (ob-lc-ledger-date (car expense)) (cdr expense)))
