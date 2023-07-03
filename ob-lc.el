@@ -87,15 +87,14 @@
   "Regexp for ICICI Amazonpay.")
 
 (defun ob-lc-parser-icici-amazonpay (line)
-  (if (string-match ob-lc-amazonpay-rx line)
-      (let* ((date (match-string 1 line))
-	     (desc (match-string 2 line))
-	     (amnt (ob-lc-amount-to-number (match-string 3 line)))
-	     (credit (string-suffix-p "CR" line))
-	     (amnt (if credit (- amnt) amnt))
-	     (desc-account (ob-lc-get-account-from-desc desc)))
-	(list (ob-lc-ledger-date date) desc amnt ob-lc-my-account desc-account))
-    (error "Line does not match regex:%s." ob-lc-amazonpay-rx)))
+  (let* ((match ob-lc-string-match-or-error ob-lc-amazonpay-rx line)
+	 (date (match-string 1 line))
+	 (desc (match-string 2 line))
+	 (amnt (ob-lc-amount-to-number (match-string 3 line)))
+	 (credit (string-suffix-p "CR" line))
+	 (amnt (if credit (- amnt) amnt))
+	 (desc-account (ob-lc-get-account-from-desc desc)))
+    (list (ob-lc-ledger-date date) desc amnt ob-lc-my-account desc-account)))
 
 ;;; AXIS ACE
 
@@ -110,18 +109,17 @@
   "Regexp for Axis ACE.")
 
 (defun ob-lc-parser-axis-ace (line)
-  (if (string-match ob-lc-axis-ace-rx line)
-      (let* ((date (match-string 1 line))
-	     (desc (match-string 2 line))
-	     (amnt1 (ob-lc-amount-to-number (match-string 3 line)))
-	     (unit1 (match-string 4 line))
-	     (amnt2 (ob-lc-amount-to-number (match-string 5 line)))
-	     (unit2 (match-string 6 line))
-	     (credit (if (string-equal unit1 "Cr") amnt1 amnt2))
-	     (debit  (if (string-equal unit2 "Dr") amnt2 amnt1))
-	     (amnt (if (and (> credit debit) (zerop debit)) (- credit) debit)))
-	(list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc)))
-    (error "Line does not match regex:%s" ob-lc-axis-ace-rx)))
+  (let* ((match ob-lc-string-match-or-error ob-lc-axis-ace-rx line)
+	 (date (match-string 1 line))
+	 (desc (match-string 2 line))
+	 (amnt1 (ob-lc-amount-to-number (match-string 3 line)))
+	 (unit1 (match-string 4 line))
+	 (amnt2 (ob-lc-amount-to-number (match-string 5 line)))
+	 (unit2 (match-string 6 line))
+	 (credit (if (string-equal unit1 "Cr") amnt1 amnt2))
+	 (debit  (if (string-equal unit2 "Dr") amnt2 amnt1))
+	 (amnt (if (and (> credit debit) (zerop debit)) (- credit) debit)))
+    (list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
 
 ;;; AXIS
 
@@ -135,16 +133,15 @@
 
 (defun ob-lc-parser-axis (line)
   "Convert LINE into ledger for AXIS."
-  (if (string-match ob-lc-axis-rx line)
-      (let* ((date (match-string 1 line))
-	     (desc (match-string 2 line))
-	     (amnt (ob-lc-amount-to-number (match-string 3 line)))
-	     (closing-bal (ob-lc-amount-to-number (match-string 4 line)))
-	     (credit (< ob-lc-opening-bal closing-bal))
-	     (amnt (if credit (- amnt) amnt)))
-	(setq ob-lc-opening-bal closing-bal)
-	(list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc)))
-    (error "Line does not match regex:%s" ob-lc-axis-rx)))
+  (let* ((match ob-lc-string-match-or-error ob-lc-axis-rx line)
+	 (date (match-string 1 line))
+	 (desc (match-string 2 line))
+	 (amnt (ob-lc-amount-to-number (match-string 3 line)))
+	 (closing-bal (ob-lc-amount-to-number (match-string 4 line)))
+	 (credit (< ob-lc-opening-bal closing-bal))
+	 (amnt (if credit (- amnt) amnt)))
+    (setq ob-lc-opening-bal closing-bal)
+    (list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
 
 ;;; HDFC
 
@@ -159,14 +156,13 @@
 
 (defun ob-lc-parser-hdfc (line)
   "Convert LINE into ledger for HDFC."
-  (if (string-match ob-lc-hdfc-rx line)
-      (let* ((date (match-string 1 line))
-	     (desc (match-string 2 line))
-	     (debit (ob-lc-amount-to-number (match-string 3 line)))
-	     (credit (ob-lc-amount-to-number (match-string 4 line)))
-	     (amnt (if (zerop debit) (- credit) debit)))
-	(list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc)))
-    (error "Line does not match regex:%s" ob-lc-hdfc-rx)))
+  (let* ((match ob-lc-string-match-or-error ob-lc-hdfc-rx line)
+	 (date (match-string 1 line))
+	 (desc (match-string 2 line))
+	 (debit (ob-lc-amount-to-number (match-string 3 line)))
+	 (credit (ob-lc-amount-to-number (match-string 4 line)))
+	 (amnt (if (zerop debit) (- credit) debit)))
+    (list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
 
 ;;; IDFC First Bank
 
@@ -180,18 +176,22 @@
 
 (defun ob-lc-parser-idfcfirstb (line)
   "Convert LINE into ledger for IDFC First Bank."
-  (if (string-match ob-lc-idfcfirstb-rx line)
-      (let* ((date (match-string 1 line))
-	     (desc (match-string 2 line))
-	     (amnt (ob-lc-amount-to-number (match-string 3 line)))
-	     (closing-bal (ob-lc-amount-to-number (match-string 4 line)))
-	     (credit (< ob-lc-opening-bal closing-bal))
-	     (amnt (if credit (- amnt) amnt)))
-	(setq ob-lc-opening-bal closing-bal)
-	(list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc)))
-    (error "Line does not match regex:%s" ob-lc-idfcfirstb-rx)))
+  (let* ((match ob-lc-string-match-or-error ob-lc-idfcfirstb-rx line)
+	 (date (match-string 1 line))
+	 (desc (match-string 2 line))
+	 (amnt (ob-lc-amount-to-number (match-string 3 line)))
+	 (closing-bal (ob-lc-amount-to-number (match-string 4 line)))
+	 (credit (< ob-lc-opening-bal closing-bal))
+	 (amnt (if credit (- amnt) amnt)))
+    (setq ob-lc-opening-bal closing-bal)
+    (list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
 
 ;; Utility functions
+
+(defun ob-lc-string-match-or-error (regexp line)
+  (if-let (match (string-match regexp line))
+      match
+    (error "Line:%s does not match regex:%s" line regexp)))
 
 (defun ob-lc-get-account-from-desc (description)
   "Categorize the given description based on partial matches using the category mapping list."
