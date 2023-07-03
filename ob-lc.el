@@ -65,6 +65,7 @@
 	(split-string (string-trim body) "\n" t)
 	(mapcar (intern parser))
 	(mapcar #'ob-lc-parser-normalize-date)
+	(mapcar #'ob-lc-parser-add-accounts)
 	(mapcar #'ob-lc-format-to-ledger)
 	(mapconcat #'identity)))))
 
@@ -95,7 +96,7 @@
 	 (credit (string-suffix-p "CR" line))
 	 (amnt (if credit (- amnt) amnt))
 	 (desc-account (ob-lc-get-account-from-desc desc)))
-    (list date desc amnt ob-lc-my-account desc-account)))
+    (list date desc amnt)))
 
 ;;; AXIS ACE
 
@@ -120,7 +121,7 @@
 	 (credit (if (string-equal unit1 "Cr") amnt1 amnt2))
 	 (debit  (if (string-equal unit2 "Dr") amnt2 amnt1))
 	 (amnt (if (and (> credit debit) (zerop debit)) (- credit) debit)))
-    (list date desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
+    (list date desc amnt)))
 
 ;;; AXIS
 
@@ -142,7 +143,7 @@
 	 (credit (< ob-lc-opening-bal closing-bal))
 	 (amnt (if credit (- amnt) amnt)))
     (setq ob-lc-opening-bal closing-bal)
-    (list date desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
+    (list date desc amnt)))
 
 ;;; HDFC
 
@@ -163,7 +164,7 @@
 	 (debit (ob-lc-amount-to-number (match-string 3 line)))
 	 (credit (ob-lc-amount-to-number (match-string 4 line)))
 	 (amnt (if (zerop debit) (- credit) debit)))
-    (list date desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
+    (list date desc amnt)))
 
 ;;; IDFC First Bank
 
@@ -185,13 +186,15 @@
 	 (credit (< ob-lc-opening-bal closing-bal))
 	 (amnt (if credit (- amnt) amnt)))
     (setq ob-lc-opening-bal closing-bal)
-    (list date desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
+    (list date desc amnt)))
 
 ;; Utility functions
 
 (defun ob-lc-parser-normalize-date (expense)
-  (pp expense)
   (cons (ob-lc-ledger-date (car expense)) (cdr expense)))
+
+(defun ob-lc-parser-add-accounts (expense)
+  (append expense (list ob-lc-my-account (ob-lc-get-account-from-desc (cadr expense)))))
 
 (defun ob-lc-string-match-or-error (regexp line)
   (if-let ((match (string-match regexp line)))
