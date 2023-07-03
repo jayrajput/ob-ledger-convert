@@ -225,16 +225,11 @@ Supported Input Formats are DD/MM/YYYY, DD-MM-YYYY, 'DD MMM YY'"
 
 (defun ob-lc-format-to-ledger (expense)
   "Format the EXPENSE as per ledger."
-  (let* ((date (car expense))
-	 (description (nth 1 expense))
-	 (expense-amount (nth 2 expense))
-	 (from-account (nth 3 expense))
-	 (to-account (nth 4 expense)))
-    (format "%s  %s\n    %s     %.2f INR\n    %s\n\n"
-	    date
-	    description
-	    to-account
-	    expense-amount
-	    from-account)))
+  (format "%s  %s\n    %s     %.2f INR\n    %s\n\n"
+	  (nth 0 expense)  ; date
+	  (nth 1 expense)  ; description
+	  (nth 4 expense)  ; to-account
+	  (nth 2 expense)  ; amount
+	  (nth 3 expense))) ; from-account
 
 (provide 'ob-lc)
