@@ -29,11 +29,11 @@ Create the org src block for =lc= with the bank/card transactions and then run =
 #+RESULTS:
 #+begin_example hledger
 2023-04-02  IMPS/P2A/309115398340/JAYRAJPU/HDFCBANK /Selfcc
-    assets:bank:axis     13075.30 INR
-    assets:transfers
+    assets:bank:hdfc     -13075.30 INR
+    assets:bank:axis
 
 2023-04-02  CreditCard Payment XXXX 9999 Ref#MV94QF6T7ZBPMJ
-    liabilities:creditcard:axis-ace     13075.30 INR
+    assets:transfers     13075.30 INR
     assets:bank:axis
 
 2023-04-23  GST @18% on Charge
@@ -45,11 +45,11 @@ Create the org src block for =lc= with the bank/card transactions and then run =
     assets:bank:axis
 
 2023-05-01  IMPS/P2A/312113348479/JAYRAJPU/HDFCBANK/Self
-    assets:bank:axis     140912.46 INR
-    assets:transfers
+    assets:bank:hdfc     -140912.46 INR
+    assets:bank:axis
 
 2023-05-01  CreditCard Payment XXXX 9999Ref#1AV0DCL01K6JWL
-    liabilities:creditcard:axis-ace     140912.46 INR
+    assets:transfers     140912.46 INR
     assets:bank:axis
 
 #+end_example
