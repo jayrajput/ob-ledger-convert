@@ -40,7 +40,9 @@
     ("MEDICAL"  "expenses:med")
     ("UTILITIES"  "expenses:utility")
     ("EDUCATION"  "expenses:education")
-    ("CASHBACK"  "income:cashback")))
+    ("CASHBACK"  "income:cashback")
+    ("CreditCard Payment XXXX 9999" "assets:transfers")
+    ("/HDFCBANK" "assets:bank:hdfc")))
 
 (defvar-local ob-lc-opening-bal nil
   "Holds the opening-bal used by parser to find if the entry is credited/debited and closing balance.")
