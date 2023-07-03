@@ -64,6 +64,7 @@
       (thread-last
 	(split-string (string-trim body) "\n" t)
 	(mapcar (intern parser))
+	(mapcar #'ob-lc-parser-normalize-date)
 	(mapcar #'ob-lc-format-to-ledger)
 	(mapconcat #'identity)))))
 
@@ -87,14 +88,14 @@
   "Regexp for ICICI Amazonpay.")
 
 (defun ob-lc-parser-icici-amazonpay (line)
-  (let* ((match ob-lc-string-match-or-error ob-lc-amazonpay-rx line)
+  (let* ((match (ob-lc-string-match-or-error ob-lc-amazonpay-rx line))
 	 (date (match-string 1 line))
 	 (desc (match-string 2 line))
 	 (amnt (ob-lc-amount-to-number (match-string 3 line)))
 	 (credit (string-suffix-p "CR" line))
 	 (amnt (if credit (- amnt) amnt))
 	 (desc-account (ob-lc-get-account-from-desc desc)))
-    (list (ob-lc-ledger-date date) desc amnt ob-lc-my-account desc-account)))
+    (list date desc amnt ob-lc-my-account desc-account)))
 
 ;;; AXIS ACE
 
@@ -109,7 +110,7 @@
   "Regexp for Axis ACE.")
 
 (defun ob-lc-parser-axis-ace (line)
-  (let* ((match ob-lc-string-match-or-error ob-lc-axis-ace-rx line)
+  (let* ((match (ob-lc-string-match-or-error ob-lc-axis-ace-rx line))
 	 (date (match-string 1 line))
 	 (desc (match-string 2 line))
 	 (amnt1 (ob-lc-amount-to-number (match-string 3 line)))
@@ -119,7 +120,7 @@
 	 (credit (if (string-equal unit1 "Cr") amnt1 amnt2))
 	 (debit  (if (string-equal unit2 "Dr") amnt2 amnt1))
 	 (amnt (if (and (> credit debit) (zerop debit)) (- credit) debit)))
-    (list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
+    (list date desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
 
 ;;; AXIS
 
@@ -133,7 +134,7 @@
 
 (defun ob-lc-parser-axis (line)
   "Convert LINE into ledger for AXIS."
-  (let* ((match ob-lc-string-match-or-error ob-lc-axis-rx line)
+  (let* ((match (ob-lc-string-match-or-error ob-lc-axis-rx line))
 	 (date (match-string 1 line))
 	 (desc (match-string 2 line))
 	 (amnt (ob-lc-amount-to-number (match-string 3 line)))
@@ -141,7 +142,7 @@
 	 (credit (< ob-lc-opening-bal closing-bal))
 	 (amnt (if credit (- amnt) amnt)))
     (setq ob-lc-opening-bal closing-bal)
-    (list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
+    (list date desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
 
 ;;; HDFC
 
@@ -156,13 +157,13 @@
 
 (defun ob-lc-parser-hdfc (line)
   "Convert LINE into ledger for HDFC."
-  (let* ((match ob-lc-string-match-or-error ob-lc-hdfc-rx line)
+  (let* ((match (ob-lc-string-match-or-error ob-lc-hdfc-rx line))
 	 (date (match-string 1 line))
 	 (desc (match-string 2 line))
 	 (debit (ob-lc-amount-to-number (match-string 3 line)))
 	 (credit (ob-lc-amount-to-number (match-string 4 line)))
 	 (amnt (if (zerop debit) (- credit) debit)))
-    (list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
+    (list date desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
 
 ;;; IDFC First Bank
 
@@ -176,7 +177,7 @@
 
 (defun ob-lc-parser-idfcfirstb (line)
   "Convert LINE into ledger for IDFC First Bank."
-  (let* ((match ob-lc-string-match-or-error ob-lc-idfcfirstb-rx line)
+  (let* ((match (ob-lc-string-match-or-error ob-lc-idfcfirstb-rx line))
 	 (date (match-string 1 line))
 	 (desc (match-string 2 line))
 	 (amnt (ob-lc-amount-to-number (match-string 3 line)))
@@ -184,12 +185,16 @@
 	 (credit (< ob-lc-opening-bal closing-bal))
 	 (amnt (if credit (- amnt) amnt)))
     (setq ob-lc-opening-bal closing-bal)
-    (list (ob-lc-ledger-date date) desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
+    (list date desc amnt ob-lc-my-account (ob-lc-get-account-from-desc desc))))
 
 ;; Utility functions
 
+(defun ob-lc-parser-normalize-date (expense)
+  (pp expense)
+  (cons (ob-lc-ledger-date (car expense)) (cdr expense)))
+
 (defun ob-lc-string-match-or-error (regexp line)
-  (if-let (match (string-match regexp line))
+  (if-let ((match (string-match regexp line)))
       match
     (error "Line:%s does not match regex:%s" line regexp)))
 
@@ -207,10 +212,10 @@ Supported Input Formats are DD/MM/YYYY, DD-MM-YYYY, 'DD MMM YY'"
   (let* ((date-components (split-string date-string "[ /-]"))
 	 (day (string-to-number (nth 0 date-components)))
 	 (month (downcase (nth 1 date-components)))
+	 (year (string-to-number (nth 2 date-components)))
 	 (match (assoc month parse-time-months))
 	 (month (if match (cdr match) (string-to-number month)))
-	 (year (string-to-number (nth 2 date-components)))
-	 (year (if (<year 100) (+year 2000) year)))
+	 (year (if (< year 100) (+ year 2000) year)))
     (format-time-string "%Y-%m-%d" (encode-time 0 0 0 day month year))))
 
 (defun ob-lc-amount-to-number (amount)
