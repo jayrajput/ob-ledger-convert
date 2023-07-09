@@ -64,14 +64,15 @@ Create the org src block for =lc= with the bank/card transactions and then run =
 
 ** Supported Parsers
 
-Following parsers are supported. See functions starting with =ob-lc-parser= in the module file.  Currently supported parsers are for Indian bank/cards.
+Following parsers are supported. See functions starting with =ob-lc-parser= in the module file.  Currently supported parsers are for Indian bank/cards.  Same parser can be used for multiple banks.  Parser uses a regex to parse a line and then process it. 
 
-1. Axis
-2. Axis Ace
-3. HDFC
-4. ICICI
-5. ICICI Amazonpay
-6. IDFC First Bank
+| Parser          | Regex                                 |
+|-----------------+---------------------------------------|
+| AXIS            | DD-MM-YYYY DESC AMT BAL               |
+| AXIS ACE        | DD/MM/YYYY DESC AMT1 CR/DR AMT2 CR/DR |
+| HDFC, ICICI     | DD/MM/YYYY DESC DEBIT CREDIT BAL      |
+| ICICI AmazonPay | DD/MM/YYYY DESC AMT                   |
+| IDFC First Bank | DD MMM YY DESC AMT BAL                |
 
 * Sample Workflow
 

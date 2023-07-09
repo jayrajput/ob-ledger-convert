@@ -69,12 +69,17 @@
 ;; Parsers
 
 ;;; reusable regexps.
-(rx-define ob-lc-amnt-rx (seq (one-or-more (or "," digit)) "." (repeat 2 digit)))
+(rx-define ob-lc-amnt-rx (seq (one-or-more (or "," digit)) "." (repeat 1 2 digit)))
 (defmacro ob-lc-line-rx (&rest args)
   "Convert given ARGS into rx separated by space and each arg enclosed in a group for extraction."
   `(rx bol
        ,@(mapcar (lambda (x) `(seq (group ,x) space)) (butlast `,args))
        (group ,(car (last args)))))
+
+
+;;; ICICI
+(defun ob-lc-parser-icici (line)
+  (ob-lc-parser-hdfc line))
 
 ;;; Amazonpay ICICI
 (defconst
