@@ -79,7 +79,7 @@
 
 ;;; ICICI
 (defun ob-lc-parser-icici (line)
-  (ob-lc-parser-hdfc line))
+  (ob-lc-parser-axis line))
 
 ;;; Amazonpay ICICI
 (defconst
