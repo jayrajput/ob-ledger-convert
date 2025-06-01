@@ -125,6 +125,26 @@
 	 (amnt (if (and (> credit debit) (zerop debit)) (- credit) debit)))
     (list date desc amnt)))
 
+
+;;; AXIS NEO
+(defconst ob-lc-axis-neo-rx
+  (ob-lc-line-rx
+   (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
+   (+ any)				; description
+   ob-lc-amnt-rx)			; amount
+  "Regexp for Axis Neo.")
+
+(defun ob-lc-parser-axis-neo (line)
+  (let* ((match (ob-lc-string-match-or-error ob-lc-axis-neo-rx line))
+	 (date (match-string 1 line))
+	 (desc (match-string 2 line))
+	 (amnt (ob-lc-amount-to-number (match-string 3 line)))
+	 (credit (string-suffix-p "Cr" line))
+	 (amnt (if credit (- amnt) amnt)))
+    (list date desc amnt)))
+
+
+
 ;;; AXIS
 
 (defconst ob-lc-axis-rx
