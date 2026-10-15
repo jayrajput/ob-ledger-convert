@@ -239,11 +239,14 @@
 (defun ob-lc-ledger-date (date-string)
   "Converts a DATE-STRING of different formats to YYYY/MM/DD format.
 
-Supported Input Formats are DD/MM/YYYY, DD-MM-YYYY, 'DD MMM YY'"
-  (let* ((date-components (split-string date-string "[ /-]"))
-	 (day (string-to-number (nth 0 date-components)))
-	 (month (downcase (nth 1 date-components)))
-	 (year (string-to-number (nth 2 date-components)))
+Supported Input Formats are DD/MM/YYYY, DD-MM-YYYY or DD MMM YY."
+  (let* ((date-rx (rx (group (= 2 digit)) (or "/" "-" " ")
+                      (group (or (= 2 digit) (= 3 alpha))) (or "/" "-" " ")
+                      (group (or (= 4 digit) (= 2 digit)))))
+         (_ (string-match date-rx date-string))
+	 (day (string-to-number (match-string 1 date-string)))
+         (month (downcase (match-string 2 date-string))) ;can be JAN instead of 01
+	 (year (string-to-number (match-string 3 date-string)))
 	 (match (assoc month parse-time-months))
 	 (month (if match (cdr match) (string-to-number month)))
 	 (year (if (< year 100) (+ year 2000) year)))
