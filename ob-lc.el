@@ -231,9 +231,12 @@
 
 (defun ob-lc-get-account-from-desc (description)
   "Categorize the given description based on partial matches using the category mapping list."
-  (let ((matched-category (cl-loop for (category-key  . category-value) in ob-lc-regex-account-map
-				   when (string-match-p (if (numberp category-key) (number-to-string category-key) category-key) description)
-				   return (car  category-value))))
+  (let ((matched-category
+         (cl-loop for (category-key . category-value) in ob-lc-regex-account-map
+		  when (string-match-p (if (numberp category-key)
+                                           (number-to-string category-key)
+                                         category-key) description)
+		  return (car category-value))))
     (or matched-category ob-lc-account-misc)))
 
 (defun ob-lc-ledger-date (date-string)
