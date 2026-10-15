@@ -88,7 +88,7 @@
   ob-lc-amazonpay-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx)			; amount
   "Regexp for ICICI Amazonpay.")
 
@@ -106,7 +106,7 @@
 (defconst ob-lc-axis-ace-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx			; amount1
    (or "Dr" "Cr")			; CR/DR
    ob-lc-amnt-rx			; amount2
@@ -131,7 +131,7 @@
 (defconst ob-lc-axis-neo-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx)			; amount
   "Regexp for Axis Neo.")
 
@@ -150,7 +150,7 @@
 (defconst ob-lc-axis-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "-" (repeat 2 digit) "-" (repeat 4 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx			; amount
    ob-lc-amnt-rx)			; closing balance
   "Regexp for Axis.")
@@ -171,7 +171,7 @@
 (defconst ob-lc-hdfc-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx			; debit amount
    ob-lc-amnt-rx			; credit amount
    ob-lc-amnt-rx)			; closing balance
@@ -191,7 +191,7 @@
 (defconst ob-lc-idfcfirstb-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) " " (repeat 3 letter) " " (repeat 2 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx			; amount
    ob-lc-amnt-rx)			; closing balance
   "Regexp for IDFC First Bank.")
