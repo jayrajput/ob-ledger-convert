@@ -53,7 +53,7 @@
 ;; Main 
 
 (defun org-babel-execute:lc (body params)
-  (if-let ((verbatim (assoc :verbatim params)))
+  (if-let* ((verbatim (assoc :verbatim params)))
       body
     (let* ((parser (ob-lc-get-param-or-error :parser params))
 	   (ob-lc-my-account (ob-lc-get-param-or-error :account params))
@@ -225,7 +225,7 @@
   (append expense (list ob-lc-my-account (ob-lc-get-account-from-desc (cadr expense)))))
 
 (defun ob-lc-string-match-or-error (regexp line)
-  (if-let ((match (string-match regexp line)))
+  (if-let* ((match (string-match regexp line)))
       match
     (error "Line:%s does not match regex:%s" line regexp)))
 
