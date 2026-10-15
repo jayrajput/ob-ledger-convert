@@ -1,5 +1,5 @@
 ;;; ob-lc.el --- Babel functions for converting anything to ledger   -*- lexical-binding: t -*-
-
+;;
 ;; Copyright (c) 2022-2023  Jay Rajput <jayrajput@gmail.com>
 
 ;; Author: Jay Rajput <jayrajput@gmail.com>
@@ -66,16 +66,18 @@
 	(mapcar #'ob-lc-format-to-ledger)
 	(mapconcat #'identity)))))
 
-;; Parsers
+
+;;;
+;;; Parsers.
+;;;
 
-;;; reusable regexps.
+;;; Reusable regexps.
 (rx-define ob-lc-amnt-rx (seq (one-or-more (or "," digit)) "." (repeat 1 2 digit)))
 (defmacro ob-lc-line-rx (&rest args)
   "Convert given ARGS into rx separated by space and each arg enclosed in a group for extraction."
   `(rx bol
        ,@(mapcar (lambda (x) `(seq (group ,x) space)) (butlast `,args))
        (group ,(car (last args)))))
-
 
 ;;; ICICI
 (defun ob-lc-parser-icici (line)
@@ -101,7 +103,6 @@
     (list date desc amnt)))
 
 ;;; AXIS ACE
-
 (defconst ob-lc-axis-ace-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
@@ -146,7 +147,6 @@
 
 
 ;;; AXIS
-
 (defconst ob-lc-axis-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "-" (repeat 2 digit) "-" (repeat 4 digit)) ; date
@@ -168,7 +168,6 @@
     (list date desc amnt)))
 
 ;;; HDFC
-
 (defconst ob-lc-hdfc-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
@@ -189,7 +188,6 @@
     (list date desc amnt)))
 
 ;;; IDFC First Bank
-
 (defconst ob-lc-idfcfirstb-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) " " (repeat 3 letter) " " (repeat 2 digit)) ; date
@@ -210,7 +208,10 @@
     (setq ob-lc-opening-bal closing-bal)
     (list date desc amnt)))
 
-;; Utility functions
+
+;;;
+;;; Utility functions.
+;;;
 
 (defun ob-lc-get-param-or-error (key params)
   "Return value for KEY in PARAMS. Generate error if KEY not found."
