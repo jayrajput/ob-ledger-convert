@@ -52,6 +52,7 @@
 
 ;; Main 
 
+;;;###autoload
 (defun org-babel-execute:lc (body params)
   (if-let* ((verbatim (assoc :verbatim params)))
       body
