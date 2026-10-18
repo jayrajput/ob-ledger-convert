@@ -1,5 +1,5 @@
 ;;; ob-lc.el --- Babel functions for converting anything to ledger   -*- lexical-binding: t -*-
-
+;;
 ;; Copyright (c) 2022-2023  Jay Rajput <jayrajput@gmail.com>
 
 ;; Author: Jay Rajput <jayrajput@gmail.com>
@@ -53,7 +53,7 @@
 ;; Main 
 
 (defun org-babel-execute:lc (body params)
-  (if-let ((verbatim (assoc :verbatim params)))
+  (if-let* ((verbatim (assoc :verbatim params)))
       body
     (let* ((parser (ob-lc-get-param-or-error :parser params))
 	   (ob-lc-my-account (ob-lc-get-param-or-error :account params))
@@ -66,16 +66,18 @@
 	(mapcar #'ob-lc-format-to-ledger)
 	(mapconcat #'identity)))))
 
-;; Parsers
+
+;;;
+;;; Parsers.
+;;;
 
-;;; reusable regexps.
+;;; Reusable regexps.
 (rx-define ob-lc-amnt-rx (seq (one-or-more (or "," digit)) "." (repeat 1 2 digit)))
 (defmacro ob-lc-line-rx (&rest args)
   "Convert given ARGS into rx separated by space and each arg enclosed in a group for extraction."
   `(rx bol
        ,@(mapcar (lambda (x) `(seq (group ,x) space)) (butlast `,args))
        (group ,(car (last args)))))
-
 
 ;;; ICICI
 (defun ob-lc-parser-icici (line)
@@ -86,7 +88,7 @@
   ob-lc-amazonpay-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx)			; amount
   "Regexp for ICICI Amazonpay.")
 
@@ -101,11 +103,10 @@
     (list date desc amnt)))
 
 ;;; AXIS ACE
-
 (defconst ob-lc-axis-ace-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx			; amount1
    (or "Dr" "Cr")			; CR/DR
    ob-lc-amnt-rx			; amount2
@@ -130,7 +131,7 @@
 (defconst ob-lc-axis-neo-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx)			; amount
   "Regexp for Axis Neo.")
 
@@ -146,11 +147,10 @@
 
 
 ;;; AXIS
-
 (defconst ob-lc-axis-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "-" (repeat 2 digit) "-" (repeat 4 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx			; amount
    ob-lc-amnt-rx)			; closing balance
   "Regexp for Axis.")
@@ -168,11 +168,10 @@
     (list date desc amnt)))
 
 ;;; HDFC
-
 (defconst ob-lc-hdfc-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) "/" (repeat 2 digit) "/" (repeat 4 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx			; debit amount
    ob-lc-amnt-rx			; credit amount
    ob-lc-amnt-rx)			; closing balance
@@ -189,11 +188,10 @@
     (list date desc amnt)))
 
 ;;; IDFC First Bank
-
 (defconst ob-lc-idfcfirstb-rx
   (ob-lc-line-rx
    (seq (repeat 2 digit) " " (repeat 3 letter) " " (repeat 2 digit)) ; date
-   (+ any)				; description
+   (+ not-newline)                      ; description
    ob-lc-amnt-rx			; amount
    ob-lc-amnt-rx)			; closing balance
   "Regexp for IDFC First Bank.")
@@ -210,7 +208,10 @@
     (setq ob-lc-opening-bal closing-bal)
     (list date desc amnt)))
 
-;; Utility functions
+
+;;;
+;;; Utility functions.
+;;;
 
 (defun ob-lc-get-param-or-error (key params)
   "Return value for KEY in PARAMS. Generate error if KEY not found."
@@ -224,25 +225,31 @@
   (append expense (list ob-lc-my-account (ob-lc-get-account-from-desc (cadr expense)))))
 
 (defun ob-lc-string-match-or-error (regexp line)
-  (if-let ((match (string-match regexp line)))
+  (if-let* ((match (string-match regexp line)))
       match
     (error "Line:%s does not match regex:%s" line regexp)))
 
 (defun ob-lc-get-account-from-desc (description)
   "Categorize the given description based on partial matches using the category mapping list."
-  (let ((matched-category (cl-loop for (category-key  . category-value) in ob-lc-regex-account-map
-				   when (string-match-p (if (numberp category-key) (number-to-string category-key) category-key) description)
-				   return (car  category-value))))
+  (let ((matched-category
+         (cl-loop for (category-key . category-value) in ob-lc-regex-account-map
+		  when (string-match-p (if (numberp category-key)
+                                           (number-to-string category-key)
+                                         category-key) description)
+		  return (car category-value))))
     (or matched-category ob-lc-account-misc)))
 
 (defun ob-lc-ledger-date (date-string)
   "Converts a DATE-STRING of different formats to YYYY/MM/DD format.
 
-Supported Input Formats are DD/MM/YYYY, DD-MM-YYYY, 'DD MMM YY'"
-  (let* ((date-components (split-string date-string "[ /-]"))
-	 (day (string-to-number (nth 0 date-components)))
-	 (month (downcase (nth 1 date-components)))
-	 (year (string-to-number (nth 2 date-components)))
+Supported Input Formats are DD/MM/YYYY, DD-MM-YYYY or DD MMM YY."
+  (let* ((date-rx (rx (group (= 2 digit)) (or "/" "-" " ")
+                      (group (or (= 2 digit) (= 3 alpha))) (or "/" "-" " ")
+                      (group (or (= 4 digit) (= 2 digit)))))
+         (_ (string-match date-rx date-string))
+	 (day (string-to-number (match-string 1 date-string)))
+         (month (downcase (match-string 2 date-string))) ;can be JAN instead of 01
+	 (year (string-to-number (match-string 3 date-string)))
 	 (match (assoc month parse-time-months))
 	 (month (if match (cdr match) (string-to-number month)))
 	 (year (if (< year 100) (+ year 2000) year)))
